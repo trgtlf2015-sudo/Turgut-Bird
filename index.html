@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>KOBAİN BIRD</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        body { margin: 0; text-align: center; font-family: 'Press Start 2P', cursive; user-select: none; background:#000; }
+        header { margin: 0 auto; width: 431px; }
+        h1 { background: linear-gradient(90deg,#00ffcc,#00aaff); color:black; padding: 1.2rem 0; margin: 0; font-size:18px; }
+        .score-container { display: flex; justify-content: space-between; padding: 8px 10px; background: #111; color:#00ffcc; font-size:10px; }
+        canvas { display:block; margin:0 auto; border:2px solid #00ffcc; background:#70c5ce; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>KOBAİN BIRD</h1>
+        <div class="score-container">
+            <div id="bestScore">Best: 0</div>
+            <div id="currentScore">Skor: 0</div>
+        </div>
+    </header>
+
+    <canvas id="canvas" width="431" height="768"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        img.src = "https://i.ibb.co/Q9yv5Jk/flappy-bird-set.png";
+
+        let gamePlaying = false;
+        const gravity = 0.5;
+        const speed = 5.8;
+        const size = [51, 36];
+        const jump = -10.5;
+        const cTenth = canvas.width / 10;
+        let index = 0, bestScore = 0, flight = 0, flyHeight = 0, currentScore = 0, pipes = [];
+        const pipeWidth = 78, pipeGap = 260;
+        const pipeLoc = () => Math.random() * (canvas.height - (pipeGap + 200)) + 100;
+
+        function setup() {
+            currentScore = 0;
+            flight = jump;
+            flyHeight = (canvas.height / 2) - (size[1] / 2);
+            pipes = Array(3).fill().map((_, i) => [canvas.width + i * (pipeGap + pipeWidth), pipeLoc()]);
+        }
+
+        function drawText(text, x, y, size = 16, color = "#fff") {
+            ctx.fillStyle = color;
+            ctx.font = `${size}px "Press Start 2P"`;
+            ctx.fillText(text, x, y);
+        }
+
+        function render() {
+            index++;
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height, -((index * (speed / 2)) % canvas.width) + canvas.width, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height, -(index * (speed / 2)) % canvas.width, 0, canvas.width, canvas.height);
+
+            if (gamePlaying) {
+                pipes.forEach(pipe => {
+                    pipe[0] -= speed;
+                    ctx.drawImage(img, 432, 588 - pipe[1], pipeWidth, pipe[1], pipe[0], 0, pipeWidth, pipe[1]);
+                    ctx.drawImage(img, 432 + pipeWidth, 108, pipeWidth, canvas.height - pipe[1] + pipeGap, pipe[0], pipe[1] + pipeGap, pipeWidth, canvas.height - pipe[1] + pipeGap);
+                    if (pipe[0] + pipeWidth < cTenth && !pipe.passed) { currentScore++; pipe.passed = true; bestScore = Math.max(bestScore, currentScore); }
+                    if (pipe[0] <= cTenth + size[0] && pipe[0] + pipeWidth >= cTenth && (pipe[1] > flyHeight || pipe[1] + pipeGap < flyHeight + size[1])) { gamePlaying = false; setup(); }
+                    if (pipe[0] < -pipeWidth) { pipe[0] = canvas.width + pipeGap; pipe[1] = pipeLoc(); pipe.passed = false; }
+                });
+            }
+
+            if (gamePlaying) {
+                ctx.drawImage(img, 432, Math.floor((index % 9) / 3) * size[1], ...size, cTenth, flyHeight, ...size);
+                flight += gravity; flyHeight += flight;
+            } else {
+                ctx.drawImage(img, 432, 0, ...size, (canvas.width / 2) - size[0] / 2, flyHeight, ...size);
+                flyHeight = (canvas.height / 2) - size[1] / 2;
+                drawText("KOBAİN BIRD", 80, 180, 18, "#00ffcc");
+                drawText(`EN YÜKSEK: ${bestScore}`, 90, 230, 12);
+                drawText("TIKLA VE OYNA", 95, 300, 12, "#00ff00");
+            }
+            document.getElementById('bestScore').innerHTML = `Best: ${bestScore}`;
+            document.getElementById('currentScore').innerHTML = `Skor: ${currentScore}`;
+            requestAnimationFrame(render);
+        }
+
+        setup();
+        img.onload = render;
+        window.addEventListener('click', () => { if (!gamePlaying) gamePlaying = true; flight = jump; });
+    </script>
+</body>
+</html>

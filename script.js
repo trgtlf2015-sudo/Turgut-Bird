@@ -70,7 +70,7 @@ function render() {
   } else {
     ctx.drawImage(img, 432, 0, ...size, (canvas.width / 2) - size[0] / 2, flyHeight, ...size);
     flyHeight = (canvas.height / 2) - size[1] / 2;
-    drawText("KOBAİN BIRD", 80, 180, 18, "#00ffcc");
+    drawText("TURGUT BIRD", 80, 180, 18, "#00ffcc");
     drawText(`EN YÜKSEK: ${bestScore}`, 90, 230, 12);
     drawText("TIKLA VE OYNA", 95, 300, 12, "#00ff00");
   }
